@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Movie Player</title>
+    <style>
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .thumbnail-container {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .thumbnail {
+            width: 200px;
+            height: auto;
+            cursor: pointer;
+            margin: 10px;
+            border: 4px solid transparent;
+            object-fit: contain;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .thumbnail:focus,
+        .thumbnail:hover {
+            border: 4px solid blue;
+        }
+
+        .control-buttons {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-buttons button {
+            margin: 0 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <h1>Movie Player</h1>
+    </center>
+
+    <div class="control-buttons">
+        <button onclick="fetch('/resume')">Resume</button>
+        <button onclick="fetch('/pause')">Pause</button>
+        <button onclick="confirm('Stop movie?') && fetch('/stop')">Stop</button>
+        <button onclick="fetch('/refresh'); setTimeout(() => location.reload(), 1000)">Refresh</button>
+        <button onclick="confirm('Restart from beginning?') && fetch('/restart')">Restart</button>
+    </div>
+
+    <div id="thumbnails" class="thumbnail-container">
+        {% for i, movie in movies %}
+        <img class="thumbnail" src="{{ movie['poster'] }}" tabindex="0" alt="{{ movie['title'] + ' ' + movie['year'] }}"
+            onerror="thumbnailError(this)" onclick="thumbnailClicked('{{ i }}')"
+            onkeydown="handleKeyPress(event, '{{ i }}')">
+        {% endfor %}
+    </div>
+
+    <script>
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        let currentThumbnailIndex = 0;
+        thumbnails[currentThumbnailIndex].focus();
+
+        function thumbnailError(image) {
+            image.onerror = null;
+            image.style.backgroundColor = '#bbbbbb'
+            image.style.borderRadius = '10px'
+        }
+
+        function thumbnailClicked(index) {
+            currentThumbnailIndex = parseInt(index);
+            if (confirm(`Play ${thumbnails[currentThumbnailIndex].alt}?`)) {
+                triggerAction(currentThumbnailIndex);
+            }
+        }
+
+        function handleKeyPress(event, index) {
+            const key = event.key;
+            switch (key) {
+                case 'ArrowRight':
+                    navigateThumbnails(1);
+                    break;
+                case 'ArrowLeft':
+                    navigateThumbnails(-1);
+                    break;
+                case 'Enter':
+                    currentThumbnailIndex = parseInt(index);
+                    triggerAction(currentThumbnailIndex);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function navigateThumbnails(direction) {
+            currentThumbnailIndex += direction;
+            if (currentThumbnailIndex < 0) {
+                currentThumbnailIndex = thumbnails.length - 1;
+            } else if (currentThumbnailIndex >= thumbnails.length) {
+                currentThumbnailIndex = 0;
+            }
+            thumbnails[currentThumbnailIndex].focus();
+        }
+
+        function triggerAction(index) {
+            fetch(`/thumbnail_clicked/${index}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+    </script>
+</body>
+
+</html>
