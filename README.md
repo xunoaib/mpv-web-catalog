@@ -24,9 +24,9 @@ This tool:
 - Install [mpvremote](https://github.com/xunoaib/mpvremote) and create an appropriate mpv config
 - Install this package (i.e.: `pip install .`)
 - Follow the [configuration](#Configuration) steps for this package
-- Run `mpv-moviectl init` to create the cache directory, scan for movies, and
+- Run `mpv-web-catalog init` to create the cache directory, scan for movies, and
   begin downloading metadata and posters for them from OMDb
-- Run `mpv-moviectl web` to launch the web server
+- Run `mpv-web-catalog serve` to launch the web server
 - Navigate to http://localhost:8000 or http://<your_ip>:8000
 
 ## Configuration

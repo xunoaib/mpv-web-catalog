@@ -21,4 +21,4 @@ where = ["src"]
 namespaces = false
 
 [project.scripts]
-mpv-moviectl = "mpv_web_catalog.cli:main"
+mpv-web-catalog = "mpv_web_catalog.cli:main"

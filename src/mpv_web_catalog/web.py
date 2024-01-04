@@ -2,7 +2,7 @@ import threading
 from subprocess import PIPE, Popen
 
 from flask import Flask, render_template, send_from_directory
-from mpvremote import controller
+from mpvremote import classes
 
 from . import metadata
 
@@ -15,7 +15,7 @@ def launch_mpv(*args):
 def play_video(fname):
     try:
         fname = fname.replace('"', r'\"')
-        controller.send_mpv_command(f'raw loadfile "{fname}"')
+        classes.send_mpv_command(f'raw loadfile "{fname}"')
     except ConnectionRefusedError:
         args = (fname, '--fullscreen')
         threading.Thread(target=launch_mpv, args=args).start()
@@ -23,7 +23,7 @@ def play_video(fname):
 
 def send_mpv_command(command):
     try:
-        controller.send_mpv_command(command)
+        classes.send_mpv_command(command)
     except ConnectionRefusedError:
         print('mpv socket connection refused')
 

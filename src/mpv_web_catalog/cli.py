@@ -16,7 +16,7 @@ def _main():
                         '--config',
                         help='dotenv-style config to load variables from')
 
-    parser.add_argument('command', choices=['init', 'web', 'web-debug'])
+    parser.add_argument('command', choices=['init', 'serve', 'serve-debug'])
     args = parser.parse_args()
 
     if args.config:
@@ -25,9 +25,9 @@ def _main():
     match args.command:
         case 'init':
             initdb()
-        case 'web':
+        case 'serve':
             serve_web()
-        case 'web-debug':
+        case 'serve-debug':
             serve_web_debug()
 
 
