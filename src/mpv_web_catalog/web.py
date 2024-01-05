@@ -8,8 +8,9 @@ from . import metadata
 
 
 def launch_mpv(*args):
-    print('Launching mpv with args:', *args)
-    Popen(['mpv', *args], stdout=PIPE, stderr=PIPE).communicate()
+    args = ('mpv', *args)
+    print('Launching: mpv', *args)
+    Popen(args, stdout=PIPE, stderr=PIPE).communicate()
 
 
 def play_video(fname):

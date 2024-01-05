@@ -16,13 +16,13 @@ from dotenv import load_dotenv
 from Levenshtein import distance
 
 DOTENV_ENVVAR = 'MPV_MOVIECTL_DOTENV'
-DEFAULT_DOTENV_PATH = '~/.config/mpvremote/config.env'
+DEFAULT_DOTENV_PATH = os.path.expanduser('~/.config/mpvremote/config.env')
 
 load_dotenv()
 load_dotenv(os.getenv(DOTENV_ENVVAR, DEFAULT_DOTENV_PATH))
 
 OMDB_APIKEY = os.environ['OMDB_APIKEY']
-GLOB_MOVIE_FNAMES = os.environ['GLOB_MOVIE_FNAMES']
+GLOB_MOVIE_FNAMES = os.path.expanduser(os.environ['GLOB_MOVIE_FNAMES'])
 CACHE_DIR = Path(os.getenv('MPV_MOVIECTL_CACHE_DIR',
                            '~/.cache/mpvremote')).expanduser()
 
