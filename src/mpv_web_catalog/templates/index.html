@@ -110,7 +110,13 @@
                 currentThumbnailIndex = 0;
             }
             thumbnails[currentThumbnailIndex].focus();
+            thumbnails[currentThumbnailIndex].scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'start'
+            });
         }
+
 
         function triggerAction(index) {
             fetch(`/thumbnail_clicked/${index}`)
