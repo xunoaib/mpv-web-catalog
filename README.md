@@ -43,9 +43,16 @@ to `~/.config/mpvremote/config.env` and modify it as needed.
 
 ### Autostart
 
-A systemd service file is provided for convenience and can be used to autostart
-the web server:
+A systemd service file is provided for convenience, and can be used to autostart
+the web server.
 
 - Copy `mpv-web-catalog.service` into `~/.config/systemd/user/` and modify it as needed
 - Run `systemctl --user daemon-reload`
 - Run `systemctl --user enable --now mpv-web-catalog` to enable autostart and immediately start the service
+
+If `mpvremote` and `mpv-web-catalog` have not been installed globally (i.e.: in
+a virtualenv), you'll need to modify the path in `ExecStart`. For example:
+
+```
+ExecStart=%h/.virtualenvs/mpvremote/bin/gunicorn mpv_web_catalog.wsgi:app -b 0.0.0.0:3239
+```
