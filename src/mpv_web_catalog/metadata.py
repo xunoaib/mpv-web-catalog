@@ -79,6 +79,7 @@ def retrieve_metadata(
         for f in glob.glob(pattern)
     )
     movie_paths = [p for p in movie_paths if p.is_file()]
+    print(f'Found {len(movie_paths)} movies matching', repr(GLOB_MOVIE_FNAMES))
 
     # retrieve movie data from OMDB based on local filenames and their durations
     search = SearchClient(
@@ -210,7 +211,9 @@ class SearchClient(BaseSearchClient):
 
         ranked_results = []
         title = path_to_title(path)
-        results = self.request(s=title, type='movie')['Search']
+        resp = self.request(s=title, type='movie')
+        if not (results := resp.get('Search')):
+            return []
         for result in results:
             details = self.request(i=result['imdbID'])
             if not (m := re.search(r'(\d+) min', details['Runtime'])):
@@ -231,14 +234,14 @@ class SearchClient(BaseSearchClient):
 
         WARN: IndexError if no matches are found
         '''
-        matches = self.find_movie_matches(path)
-        final = copy.deepcopy(matches[0])
-        if final['Poster'] == 'N/A' and fix_posters:
-            for match in matches:
-                if match['Poster'] != 'N/A':
-                    final['Poster'] = match['Poster']
-                    break
-        return final
+        if matches := self.find_movie_matches(path):
+            final = copy.deepcopy(matches[0])
+            if final['Poster'] == 'N/A' and fix_posters:
+                for match in matches:
+                    if match['Poster'] != 'N/A':
+                        final['Poster'] = match['Poster']
+                        break
+            return final
 
     def find_best_movie_matches(self, paths: list[Path], fix_posters=True):
         '''
@@ -265,10 +268,10 @@ class PosterDownloader:
         if path.exists():
             return path.name
 
-        if self.offline:
-            raise ApiException(
-                f'API client is in offline mode. PosterDownloader requested: {url}'
-            )
+        #if self.offline:
+        #    raise ApiException(
+        #        f'API client is in offline mode. PosterDownloader requested: {url}'
+        #    )
 
         async with session.get(url) as response:
             if response.status == 200:

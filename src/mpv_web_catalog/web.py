@@ -33,7 +33,7 @@ def create_app():
 
     app = Flask(__name__)
 
-    movies = metadata.retrieve_metadata(offline=True)
+    movies = metadata.retrieve_metadata(offline=False)
 
     @app.route('/')
     def index():
