@@ -12,6 +12,7 @@ from pathlib import Path
 import aiohttp
 import cv2
 import requests
+from braceexpand import braceexpand
 from dotenv import load_dotenv
 from Levenshtein import distance
 
@@ -40,8 +41,8 @@ class ApiException(Exception):
 
 def initialize(confirm=True):
     '''Create the cache directory and begin downloading movie metadata'''
-    if confirm and input(
-            f'Initialize cache at {CACHE_DIR}? [y/N] ').lower() != 'y':
+    if confirm and input(f'Initialize cache at {CACHE_DIR}? [y/N] '
+                         ).lower() != 'y':
         return 1
 
     if CACHE_DIR.exists():
@@ -60,23 +61,29 @@ def initialize(confirm=True):
     return retrieve_metadata(offline=False)
 
 
-def retrieve_metadata(movie_path_glob=GLOB_MOVIE_FNAMES,
-                      offline=False,
-                      write_data_cache=True,
-                      warn_dupes=True):
+def retrieve_metadata(
+    movie_path_glob=GLOB_MOVIE_FNAMES,
+    offline=False,
+    write_data_cache=True,
+    warn_dupes=True
+):
     '''
     Given a list of paths to local movie files, retrieve metadata for them from
     OMDb using (1) the local filename and (2) total runtime to distinguish
     between remakes and similar titles. Movie poster images are also downloaded
     and API searches are cached.
     '''
-    movie_paths = list(map(Path, glob.glob(movie_path_glob)))
-    movie_paths = [p for p in map(Path, movie_paths) if p.is_file()]
+
+    movie_paths = sorted(
+        Path(f).expanduser() for pattern in braceexpand(movie_path_glob)
+        for f in glob.glob(pattern)
+    )
+    movie_paths = [p for p in movie_paths if p.is_file()]
 
     # retrieve movie data from OMDB based on local filenames and their durations
-    search = SearchClient(OMDB_APIKEY,
-                          cachefile=SEARCH_CACHE_FILE,
-                          offline=offline)
+    search = SearchClient(
+        OMDB_APIKEY, cachefile=SEARCH_CACHE_FILE, offline=offline
+    )
 
     found, notfound = search.find_best_movie_matches(movie_paths)
     if notfound:
@@ -161,7 +168,8 @@ class BaseSearchClient:
         if response.status_code != 200:
             print(response.text)
             raise Exception(
-                f'Received bad response code: {response.status_code}')
+                f'Received bad response code: {response.status_code}'
+            )
         return response.json()
 
 
@@ -212,7 +220,8 @@ class SearchClient(BaseSearchClient):
             score_time = abs(runtime2 - runtime1)
             score_title = distance(details['Title'].lower(), title)
             ranked_results.append(
-                (score_title, score_time, len(ranked_results), details))
+                (score_title, score_time, len(ranked_results), details)
+            )
         return [r[-1] for r in sorted(ranked_results)]
 
     def find_best_movie_match(self, path: Path, fix_posters=True):
